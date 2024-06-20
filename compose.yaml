@@ -1,0 +1,16 @@
+services:
+    composer:
+        image: composer:latest
+        working_dir: /app
+        command: sh -c "cd /app && composer update --prefer-dist"
+        volumes:
+            - ./:/app/:rw
+
+    application:
+        image: php:8.3-cli-alpine
+        working_dir: /app
+        command: tail -f >/dev/null
+        depends_on:
+            -   composer
+        volumes:
+            -   ./:/app/:rw

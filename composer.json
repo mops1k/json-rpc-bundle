@@ -1,0 +1,44 @@
+{
+    "require": {
+        "php": ">=8.3",
+        "symfony/framework-bundle": "^6.4",
+        "symfony/property-access": "^6.4",
+        "symfony/serializer": "^6.4",
+        "symfony/validator": "^6.4"
+    },
+    "require-dev": {
+        "ergebnis/composer-normalize": "^2.42",
+        "laravel/pint": "^1.13",
+        "phpunit/phpunit": "10.5.21"
+    },
+    "autoload": {
+        "psr-4": {
+            "JsonRpcBundle\\": "./src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "JsonRpcBundle\\Tests\\": "./tests"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true
+        },
+        "sort-packages": true
+    },
+    "extra": {
+        "composer-normalize": {
+            "indent-size": 4,
+            "indent-style": "space"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "composer normalize"
+        ],
+        "post-update-cmd": [
+            "composer normalize"
+        ]
+    }
+}

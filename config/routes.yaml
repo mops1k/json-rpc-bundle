@@ -1,0 +1,4 @@
+json_rpc_entrypoint:
+    path: '/rpc'
+    methods: 'POST'
+    controller: 'JsonRpcBundle\Controller\JsonRpcController'

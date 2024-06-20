@@ -1,0 +1,10 @@
+{
+    "preset": "symfony",
+    "rules": {
+        "single_line_throw": false
+    },
+    "exclude": [
+        "vendor",
+        "var"
+    ]
+}
