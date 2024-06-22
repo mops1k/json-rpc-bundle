@@ -27,7 +27,6 @@ class JsonRpcControllerTest extends KernelTestCase
         }
 
         self::assertEquals(200, $response->getStatusCode());
-        self::assertJson($response->getContent() ?: null);
 
         $assertionCallable($response);
     }
@@ -42,6 +41,7 @@ class JsonRpcControllerTest extends KernelTestCase
                 'id' => 1,
             ],
             'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
                 $content = \json_decode($response->getContent(), true);
                 self::assertEquals(5, $content['result']);
                 self::assertEquals(1, $content['id']);
@@ -55,6 +55,7 @@ class JsonRpcControllerTest extends KernelTestCase
                 'id' => 1,
             ],
             'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
                 $content = \json_decode($response->getContent(), true);
                 self::assertEquals(5, $content['result']);
                 self::assertEquals(1, $content['id']);
@@ -68,6 +69,7 @@ class JsonRpcControllerTest extends KernelTestCase
                 'id' => 1,
             ],
             'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
                 $content = \json_decode($response->getContent(), true);
                 self::assertEquals(['id' => 82, 'text' => 'test text'], $content['result']);
                 self::assertEquals(1, $content['id']);
@@ -81,6 +83,7 @@ class JsonRpcControllerTest extends KernelTestCase
                 'id' => 1,
             ],
             'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
                 $content = \json_decode($response->getContent(), true);
                 self::assertEquals(['id' => 82, 'text' => 'test text'], $content['result']);
                 self::assertEquals(1, $content['id']);
@@ -94,6 +97,7 @@ class JsonRpcControllerTest extends KernelTestCase
                 'id' => 1,
             ],
             'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
                 $content = \json_decode($response->getContent(), true);
                 self::assertEquals(['id' => 82, 'text' => 'test text'], $content['result']);
                 self::assertEquals(1, $content['id']);
@@ -115,6 +119,7 @@ class JsonRpcControllerTest extends KernelTestCase
                 ],
             ],
             'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
                 $content = \json_decode($response->getContent(), true);
                 self::assertEquals('test text', $content[0]['result']['text']);
                 self::assertEquals(82, $content[0]['result']['id']);
@@ -131,6 +136,7 @@ class JsonRpcControllerTest extends KernelTestCase
                 'id' => 1,
             ],
             'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
                 $content = \json_decode($response->getContent(), true);
                 self::assertArrayHasKey('error', $content);
                 self::assertEquals(-32602, $content['error']['code']);
@@ -148,6 +154,7 @@ class JsonRpcControllerTest extends KernelTestCase
                 'id' => 1,
             ],
             'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
                 $content = \json_decode($response->getContent(), true);
                 self::assertArrayHasKey('error', $content);
                 self::assertEquals(-32602, $content['error']['code']);
@@ -164,20 +171,44 @@ class JsonRpcControllerTest extends KernelTestCase
                 'id' => 1,
             ],
             'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
                 $content = \json_decode($response->getContent(), true);
                 self::assertArrayHasKey('error', $content);
                 self::assertEquals(-32603, $content['error']['code']);
                 self::assertEquals('Internal JSON-RPC error.', $content['error']['message']);
-                self::assertEquals(
-                    'JsonRpcBundle\Tests\Stubs\Method\TestMethodWithoutContract::__invoke(): Argument #1 ($id) must be of type int, string given, called in /app/src/Handler/MethodHandler.php on line 75',
+                self::assertStringContainsString(
+                    'JsonRpcBundle\Tests\Stubs\Method\TestMethodWithoutContract::__invoke(): Argument #1 ($id) must be of type int, string given',
                     $content['error']['data']
                 );
                 self::assertEquals(1, $content['id']);
             },
         ];
+        yield 'notification method' => [
+            'content' => [
+                'jsonrpc' => '2.0',
+                'method' => 'testNotificationMethod',
+                'params' => null,
+                'id' => 8,
+            ],
+            'assertionCallable' => function (Response $response) {
+                self::assertFalse(json_validate($response->getContent()));
+            },
+        ];
+        //        yield 'notification and method without contract' => [
+        //            'content' => [
+        //                'jsonrpc' => '2.0',
+        //                'method' => 'testNotificationMethod',
+        //                'params' => [],
+        //                'id' => 8,
+        //            ],
+        //            'assertionCallable' => function (Response $response) {
+        //                self::assertFalse(json_validate($response->getContent()));
+        //            },
+        //        ];
         yield 'parse error' => [
             'content' => [1],
             'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
                 $content = \json_decode($response->getContent(), true);
                 self::assertArrayHasKey('error', $content);
                 self::assertEquals(-32700, $content['error']['code']);

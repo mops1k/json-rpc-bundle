@@ -17,8 +17,8 @@ readonly class JsonRpcRequest
         public ?string $method = null,
 
         #[Groups('JsonRpcRequest')]
-        #[Assert\NotBlank(allowNull: false)]
-        public array $params = [],
+        #[Assert\NotBlank(allowNull: true)]
+        public ?array $params = null,
 
         #[Groups('JsonRpcRequest')]
         public string|int|null $id = null,

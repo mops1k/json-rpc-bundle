@@ -4,8 +4,9 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use JsonRpcBundle\ArgumentResolver\JsonRpcRequestResolver;
 use JsonRpcBundle\Controller\JsonRpcController;
-use JsonRpcBundle\Handler\MethodHandler;
 use JsonRpcBundle\Listener\JsonRpcExceptionListener;
+use JsonRpcBundle\MethodResolver\MethodResolver;
+use JsonRpcBundle\MethodResolver\MethodResolverInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 return static function (ContainerConfigurator $container): void {
@@ -17,7 +18,8 @@ return static function (ContainerConfigurator $container): void {
         ])
         ->tag('controller.argument_value_resolver', ['priority' => 0]);
 
-    $services->set(MethodHandler::class)
+    $services->set(MethodResolverInterface::class)
+        ->class(MethodResolver::class)
         ->args([
             '$denormalizer' => service('serializer'),
             '$validator' => service('validator'),
@@ -25,7 +27,7 @@ return static function (ContainerConfigurator $container): void {
 
     $services->set(JsonRpcController::class)
         ->args([
-            '$methodHandler' => service(MethodHandler::class),
+            '$methodHandler' => service(MethodResolverInterface::class),
             '$normalizer' => service('serializer'),
         ])
         ->tag('controller.service_arguments');

@@ -1,17 +1,18 @@
 <?php
 
-namespace JsonRpcBundle\Handler;
+namespace JsonRpcBundle\MethodResolver;
 
 use JsonRpcBundle\Attribute\RpcMethodContract;
 use JsonRpcBundle\Exceptions\JsonRpcInternalErrorException;
 use JsonRpcBundle\Exceptions\JsonRpcInvalidParamsException;
 use JsonRpcBundle\Exceptions\JsonRpcMethodNotExistsException;
 use JsonRpcBundle\Request\JsonRpcRequest;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class MethodHandler
+class MethodResolver implements MethodResolverInterface
 {
     public function __construct(
         private readonly DenormalizerInterface $denormalizer,
@@ -21,7 +22,11 @@ class MethodHandler
 
     private array $methods = [];
 
-    public function handle(JsonRpcRequest $jsonRpcRequest): mixed
+    /**
+     * @throws \ReflectionException
+     * @throws ExceptionInterface
+     */
+    public function resolve(JsonRpcRequest $jsonRpcRequest): mixed
     {
         if (!\array_key_exists($jsonRpcRequest->method, $this->methods)) {
             throw new JsonRpcMethodNotExistsException(
@@ -49,30 +54,50 @@ class MethodHandler
         if (null === $contractClassName) {
             $parameters = $methodReflectionClass->getMethod('__invoke')->getParameters();
             $params = [];
-            foreach ($parameters as $parameter) {
-                if (\array_key_exists($parameter->getName(), $jsonRpcRequest->params)) {
-                    $params[$parameter->getName()] = $jsonRpcRequest->params[$parameter->getName(
-                    )] ?? $parameter->getDefaultValue();
-                    ++$index;
+            if (null !== $jsonRpcRequest->params) {
+                foreach ($parameters as $parameter) {
+                    if (\array_key_exists($parameter->getName(), $jsonRpcRequest->params)) {
+                        $params[$parameter->getName()] = $jsonRpcRequest->params[$parameter->getName(
+                        )] ?? $parameter->getDefaultValue();
+                        ++$index;
 
-                    continue;
+                        continue;
+                    }
+
+                    $params[$parameter->getName()] = $jsonRpcRequest->params[$index] ?? $parameter->getDefaultValue();
                 }
 
-                $params[$parameter->getName()] = $jsonRpcRequest->params[$index] ?? $parameter->getDefaultValue();
+                if (\method_exists($method, 'configureValidation')) {
+                    $validationGroups = [];
+                    if (\method_exists($method, 'validationGroups')) {
+                        $validationGroups = $method->validationGroups();
+                    }
+                    $violations = $this->validator->validate($params, $method->configureValidation(), $validationGroups);
+                    if (\count($violations) > 0) {
+                        throw new JsonRpcInvalidParamsException($violations, $jsonRpcRequest->id);
+                    }
+                }
             }
 
-            if (\method_exists($method, 'configureValidation')) {
-                $validationGroups = [];
-                if (\method_exists($method, 'validationGroups')) {
-                    $validationGroups = $method->validationGroups();
-                }
-                $violations = $this->validator->validate($params, $method->configureValidation(), $validationGroups);
-                if (\count($violations) > 0) {
-                    throw new JsonRpcInvalidParamsException($violations, $jsonRpcRequest->id);
+            $result = null === $jsonRpcRequest->params ? $method() : $method(...$params);
+
+            $methodReflection = $methodReflectionClass->getMethod('__invoke');
+            $returnType = $methodReflection->getReturnType();
+            if (null === $returnType) {
+                return null;
+            }
+            if ($returnType instanceof \ReflectionNamedType) {
+                $returnTypeName = $returnType->getName();
+                if (\array_key_exists($returnTypeName, [
+                    'void' => true,
+                    'never' => true,
+                    'null' => true,
+                ])) {
+                    return null;
                 }
             }
 
-            return $method(...$params);
+            return $result;
         }
 
         $params = [];
