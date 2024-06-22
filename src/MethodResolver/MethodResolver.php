@@ -27,6 +27,7 @@ class MethodResolver implements MethodResolverInterface
 
     /**
      * @psalm-suppress ArgumentTypeCoercion
+     *
      * @throws \ReflectionException
      * @throws ExceptionInterface
      */

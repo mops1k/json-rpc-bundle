@@ -15,6 +15,9 @@ pint:
 test:
 	docker compose exec application sh -c "php vendor/bin/phpunit"
 
+psalm:
+	docker compose exec application sh -c "php vendor/bin/psalm"
+
 application:
 	docker compose exec application sh
 
