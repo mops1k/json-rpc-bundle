@@ -51,14 +51,14 @@ readonly class JsonRpcController
         if (1 === count($responses)) {
             $response = reset($responses);
             if (false === $response) {
-                return new JsonRpcResponse(null, null);
+                return new JsonRpcResponse(id: null);
             }
 
             return $response;
         }
 
         if (0 === count($responses)) {
-            return new Response(null, headers: ['Content-Type' => 'application/json']);
+            return new Response(headers: ['Content-Type' => 'application/json']);
         }
 
         return new JsonRpcCollectionResponse($responses);

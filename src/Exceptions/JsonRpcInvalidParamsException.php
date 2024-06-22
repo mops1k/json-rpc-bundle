@@ -4,11 +4,12 @@ namespace JsonRpcBundle\Exceptions;
 
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 class JsonRpcInvalidParamsException extends BadRequestHttpException implements JsonRpcExceptionInterface
 {
     public function __construct(
-        public readonly ConstraintViolationList $errors,
+        public readonly ConstraintViolationListInterface $errors,
         private readonly int|string|null $id = null,
         ?\Exception $previous = null
     ) {
@@ -19,7 +20,7 @@ class JsonRpcInvalidParamsException extends BadRequestHttpException implements J
         );
     }
 
-    public function getErrors(): ConstraintViolationList
+    public function getErrors(): ConstraintViolationListInterface
     {
         return $this->errors;
     }

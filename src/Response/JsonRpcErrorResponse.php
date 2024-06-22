@@ -6,10 +6,13 @@ use JsonRpcBundle\Exceptions\JsonRpcExceptionInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Validator\ConstraintViolation;
 
+/**
+ * @psalm-suppress PropertyNotSetInConstructor
+ */
 class JsonRpcErrorResponse extends JsonResponse
 {
     public function __construct(
-        JsonRpcExceptionInterface|\Throwable|null $exception,
+        JsonRpcExceptionInterface|\Throwable $exception,
         int|string|null $id,
         int $status = 200,
         array $headers = ['Content-Type' => 'application/json']
@@ -19,7 +22,7 @@ class JsonRpcErrorResponse extends JsonResponse
         $this->setResult($exception, $id);
     }
 
-    public function setResult(JsonRpcExceptionInterface $exception, int|string|null $id): void
+    public function setResult(JsonRpcExceptionInterface|\Throwable $exception, int|string|null $id): void
     {
         $result = [
             'jsonrpc' => '2.0',

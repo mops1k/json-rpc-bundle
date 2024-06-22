@@ -5,6 +5,9 @@ namespace JsonRpcBundle\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @psalm-suppress PropertyNotSetInConstructor
+ */
 class JsonRpcCollectionResponse extends JsonResponse
 {
     public function __construct(

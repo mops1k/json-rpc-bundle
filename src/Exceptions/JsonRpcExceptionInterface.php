@@ -2,7 +2,7 @@
 
 namespace JsonRpcBundle\Exceptions;
 
-interface JsonRpcExceptionInterface
+interface JsonRpcExceptionInterface extends \Throwable
 {
     public function getId(): int|string|null;
 }

@@ -12,6 +12,9 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 class MethodResolver implements MethodResolverInterface
 {
     public function __construct(
@@ -23,11 +26,19 @@ class MethodResolver implements MethodResolverInterface
     private array $methods = [];
 
     /**
+     * @psalm-suppress ArgumentTypeCoercion
      * @throws \ReflectionException
      * @throws ExceptionInterface
      */
     public function resolve(JsonRpcRequest $jsonRpcRequest): mixed
     {
+        if (null === $jsonRpcRequest->method) {
+            throw new JsonRpcMethodNotExistsException(
+                'Method is not defined.',
+                $jsonRpcRequest->id
+            );
+        }
+
         if (!\array_key_exists($jsonRpcRequest->method, $this->methods)) {
             throw new JsonRpcMethodNotExistsException(
                 \sprintf('Method "%s" does not exists', $jsonRpcRequest->method),
@@ -45,7 +56,6 @@ class MethodResolver implements MethodResolverInterface
                 continue;
             }
 
-            /** @var RpcMethodContract $instance */
             $instance = $attribute->newInstance();
             $contractClassName = $instance->className;
         }
@@ -104,14 +114,14 @@ class MethodResolver implements MethodResolverInterface
 
         $contractReflectionClass = new \ReflectionClass($contractClassName);
         foreach ($contractReflectionClass->getProperties() as $property) {
-            if (\array_key_exists($property->getName(), $jsonRpcRequest->params)) {
-                $params[$property->getName()] = $jsonRpcRequest->params[$property->getName()];
+            if (\array_key_exists($property->getName(), $jsonRpcRequest->params ?? [])) {
+                $params[$property->getName()] = $jsonRpcRequest->params[$property->getName()] ?? null;
                 ++$index;
 
                 continue;
             }
 
-            $params[$property->getName()] = $jsonRpcRequest->params[$index];
+            $params[$property->getName()] = $jsonRpcRequest->params[$index] ?? null;
             ++$index;
         }
 

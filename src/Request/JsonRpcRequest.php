@@ -5,8 +5,14 @@ namespace JsonRpcBundle\Request;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * @psalm-suppress PossiblyUnusedProperty
+ */
 readonly class JsonRpcRequest
 {
+    /**
+     * @psalm-suppress PossiblyUnusedMethod
+     */
     public function __construct(
         #[Groups('JsonRpcRequest')]
         #[Assert\NotBlank(allowNull: false)]

@@ -14,6 +14,9 @@ use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 readonly class JsonRpcRequestResolver implements ValueResolverInterface
 {
     public function __construct(
@@ -25,7 +28,7 @@ readonly class JsonRpcRequestResolver implements ValueResolverInterface
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
         if (!is_a($argument->getType(), JsonRpcRequest::class, true)) {
-            return null;
+            return;
         }
 
         $contentTypeHeaderValue = $request->headers->get('Content-Type');
@@ -43,7 +46,7 @@ readonly class JsonRpcRequestResolver implements ValueResolverInterface
                 default => throw new JsonRpcParseErrorException('Content parse error', null)
             };
 
-            foreach ($resolveData as $id => $item) {
+            foreach ($resolveData as $item) {
                 $jsonRpcRequest = $this->serializer->denormalize(
                     data: (array) $item,
                     type: JsonRpcRequest::class,

@@ -17,7 +17,7 @@ class JsonRpcBundle extends Bundle
             function (
                 ChildDefinition $definition,
                 AsRpcMethod $attribute,
-                \ReflectionClass $reflectionClass
+                \Reflector $reflector
             ) {
                 $definition->setAutowired(true);
                 $definition->setAutoconfigured(true);
