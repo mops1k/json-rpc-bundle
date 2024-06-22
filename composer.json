@@ -19,10 +19,10 @@
     ],
     "require": {
         "php": ">=8.3",
-        "symfony/framework-bundle": "^6.4",
-        "symfony/property-access": "^6.4",
-        "symfony/serializer": "^6.4",
-        "symfony/validator": "^6.4"
+        "symfony/framework-bundle": "^6.4 || ^7.0",
+        "symfony/property-access": "^6.4 || ^7.0",
+        "symfony/serializer": "^6.4 || ^7.0",
+        "symfony/validator": "^6.4 || ^7.0"
     },
     "require-dev": {
         "ergebnis/composer-normalize": "^2.42",
