@@ -64,8 +64,8 @@ jobs:
                 run: composer update --no-progress --prefer-lowest
             -   name: Execute code style checks
                 run: vendor/bin/pint --test
-            -   name: Execute phpstan checks
-                run: vendor/bin/phpstan --memory-limit=-1 --no-progress
+            -   name: Execute psalm checks
+                run: vendor/bin/psalm --memory-limit=-1 --no-progress
             -   name: PHPUnit Tests
                 uses: php-actions/phpunit@v3
                 env:
