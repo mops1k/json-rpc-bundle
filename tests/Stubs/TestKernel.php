@@ -110,7 +110,7 @@ class TestKernel extends Kernel
             return $collection;
         }
         $configurator = new RoutingConfigurator($collection, $kernelLoader, $file, $file, 'test');
-        $configurator->import(__DIR__.'/../../config/routes.php');
+        $configurator->import(__DIR__ . '/../../Resources/config/routing/json-rpc-bundle.php');
 
         return $collection;
     }

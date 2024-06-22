@@ -11,6 +11,13 @@ with [CQRS](https://en.wikipedia.org/wiki/Command_Query_Responsibility_Segregati
 ```bash
 composer require mops1k/json-rpc-bundle
 ```
+Import route delaration in your routes:
+```yaml
+#config/routes/json-rpc.yaml
+app_file:
+    # loads routes from the given routing file stored in some bundle
+    resource: '@JsonRpcBundle/Resources/config/routing/json-rpc-bundle.yaml'
+```
 
 ## Usage
 
