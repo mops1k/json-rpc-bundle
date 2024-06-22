@@ -78,12 +78,12 @@ class MethodResolver implements MethodResolverInterface
                     $params[$parameter->getName()] = $jsonRpcRequest->params[$index] ?? $parameter->getDefaultValue();
                 }
 
-                if (\method_exists($method, 'configureValidation')) {
-                    $validationGroups = [];
-                    if (\method_exists($method, 'validationGroups')) {
-                        $validationGroups = $method->validationGroups();
-                    }
-                    $violations = $this->validator->validate($params, $method->configureValidation(), $validationGroups);
+                if ($method instanceof ValidateMethodParametersInterface) {
+                    $violations = $this->validator->validate(
+                        $params,
+                        $method->configureValidation(),
+                        $method->validationGroups()
+                    );
                     if (\count($violations) > 0) {
                         throw new JsonRpcInvalidParamsException($violations, $jsonRpcRequest->id);
                     }
