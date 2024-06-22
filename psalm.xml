@@ -11,6 +11,7 @@
         <directory name="src"/>
         <file name="config/services.php"/>
         <ignoreFiles>
+            <directory name="src/Exceptions"/>
             <directory name="vendor"/>
             <directory name="tests"/>
         </ignoreFiles>

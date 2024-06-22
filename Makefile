@@ -21,6 +21,12 @@ coverage:
 psalm:
 	docker compose exec application sh -c "php vendor/bin/psalm"
 
+update:
+	docker compose run composer sh -c "composer update"
+
+update-lowest:
+	docker compose run composer sh -c "composer update --prefer-lowest"
+
 application:
 	docker compose exec application sh
 
