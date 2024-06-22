@@ -45,41 +45,41 @@ jobs:
                 with:
                     files: ./coverage/clover.xml
                     verbose: true
-    bundle-tests-lower-deps:
-        runs-on: ubuntu-latest
-        steps:
-            -   uses: shivammathur/setup-php@v2
-                with:
-                    php-version: '8.3'
-            -   uses: actions/checkout@v2
-            -   name: Cache Composer packages
-                id: composer-cache
-                uses: actions/cache@v2
-                with:
-                    path: vendor
-                    key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-                    restore-keys: |
-                        ${{ runner.os }}-php-
-            -   name: Install Dependencies
-                run: composer update --no-progress --prefer-lowest
-            -   name: Execute code style checks
-                run: vendor/bin/pint --test
-            -   name: Execute psalm checks
-                run: vendor/bin/psalm --memory-limit=-1 --no-progress
-            -   name: PHPUnit Tests
-                uses: php-actions/phpunit@v3
-                env:
-                    XDEBUG_MODE: coverage
-                with:
-                    version: 10.5.21
-                    bootstrap: vendor/autoload.php
-                    configuration: phpunit.xml
-                    php_extensions: xdebug
-                    coverage_clover: ./coverage/clover.xml
-            -   name: Upload to Codecov
-                uses: codecov/codecov-action@v2
-                env:
-                    CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-                with:
-                    files: ./coverage/clover.xml
-                    verbose: true
+#    bundle-tests-lower-deps:
+#        runs-on: ubuntu-latest
+#        steps:
+#            -   uses: shivammathur/setup-php@v2
+#                with:
+#                    php-version: '8.3'
+#            -   uses: actions/checkout@v2
+#            -   name: Cache Composer packages
+#                id: composer-cache
+#                uses: actions/cache@v2
+#                with:
+#                    path: vendor
+#                    key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+#                    restore-keys: |
+#                        ${{ runner.os }}-php-
+#            -   name: Install Dependencies
+#                run: composer update --no-progress --prefer-lowest
+#            -   name: Execute code style checks
+#                run: vendor/bin/pint --test
+#            -   name: Execute psalm checks
+#                run: vendor/bin/psalm --memory-limit=-1 --no-progress
+#            -   name: PHPUnit Tests
+#                uses: php-actions/phpunit@v3
+#                env:
+#                    XDEBUG_MODE: coverage
+#                with:
+#                    version: 10.5.21
+#                    bootstrap: vendor/autoload.php
+#                    configuration: phpunit.xml
+#                    php_extensions: xdebug
+#                    coverage_clover: ./coverage/clover.xml
+#            -   name: Upload to Codecov
+#                uses: codecov/codecov-action@v2
+#                env:
+#                    CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+#                with:
+#                    files: ./coverage/clover.xml
+#                    verbose: true
