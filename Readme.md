@@ -1,6 +1,7 @@
 # JSON-RPC Server bundle
 
 This bundle provide an easy way to implement json-rpc server with fully specification supporting.
+Bundle supports multiple procedure calls in one request as described in specification.
 
 [JSON-RPC](https://www.jsonrpc.org/specification) specification is fully compatible
 with [CQRS](https://en.wikipedia.org/wiki/Command_Query_Responsibility_Segregation) architecture
@@ -24,8 +25,8 @@ use JsonRpcBundle\Attribute\AsRpcMethod;
 use Symfony\Component\Validator\Constraints\Collection;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 
-#[AsRpcMethod('testMethodWithoutContract')]
-class TestMethodWithoutContract
+#[AsRpcMethod('methodWithoutContract')]
+class MethodWithoutContract
 {
     public function __invoke(int $id): int
     {
@@ -58,9 +59,9 @@ readonly class Contract
     }
 }
 
-#[AsRpcMethod('testMethodWithContract')]
+#[AsRpcMethod('methodWithContract')]
 #[RpcMethodContract(Contract::class)]
-class TestMethodWithContract
+class MethodWithContract
 {
     public function __invoke(Contract $contract): array
     {
@@ -86,8 +87,8 @@ use Symfony\Component\Validator\Constraints\Collection;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\GroupSequence;
 
-#[AsRpcMethod('testMethodWithoutContract')]
-class TestMethodWithoutContract implements ValidateMethodParametersInterface
+#[AsRpcMethod('methodWithoutContract')]
+class MethodWithoutContract implements ValidateMethodParametersInterface
 {
     public function __invoke(int $id): int
     {
@@ -111,4 +112,16 @@ class TestMethodWithoutContract implements ValidateMethodParametersInterface
 ```
 
 Json rpc supports notification requests what does not return any response. To make your method as notification, just
-add `void` in `__invoke` return type hint.
+add `void` in `__invoke` return type hint. Example:
+```php
+use JsonRpcBundle\Attribute\AsRpcMethod;
+
+#[AsRpcMethod('updateUser')]
+class UpdateUser
+{
+    public function __invoke(int $id): void
+    {
+        // some logic
+    }
+}
+```
