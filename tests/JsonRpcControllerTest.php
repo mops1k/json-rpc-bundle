@@ -7,6 +7,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class JsonRpcControllerTest extends KernelTestCase
 {
@@ -29,6 +30,42 @@ class JsonRpcControllerTest extends KernelTestCase
         self::assertEquals(200, $response->getStatusCode());
 
         $assertionCallable($response);
+    }
+
+    public function testRpcPreconditionFailed()
+    {
+
+        self::bootKernel();
+        $rpcRequest = Request::create('/rpc', Request::METHOD_POST, content: [
+            'jsonrpc' => '2.0',
+            'method' => 'testMethodWithoutContract',
+            'params' => [5],
+            'id' => 1,
+        ]);
+        $response = self::$kernel?->handle($rpcRequest);
+        if (!$response instanceof Response) {
+            self::fail();
+        }
+
+        self::assertEquals(200, $response->getStatusCode());
+        $content = \json_decode($response->getContent(), true);
+        self::assertArrayHasKey('error', $content);
+        self::assertEquals(0, $content['error']['code']);
+        self::assertEquals('Content-Type must be application/json', $content['error']['message']);
+        self::assertEquals(null, $content['id']);
+    }
+
+    public function testExceptionListenerNotCalled()
+    {
+
+        self::bootKernel();
+        $rpcRequest = Request::create('/bad_path');
+        $response = self::$kernel?->handle($rpcRequest);
+        if (!$response instanceof Response) {
+            self::fail();
+        }
+
+        self::assertEquals(404, $response->getStatusCode());
     }
 
     public static function dataProvider(): iterable
@@ -178,6 +215,26 @@ class JsonRpcControllerTest extends KernelTestCase
                 self::assertEquals('Internal JSON-RPC error.', $content['error']['message']);
                 self::assertStringContainsString(
                     'JsonRpcBundle\Tests\Stubs\Method\TestMethodWithoutContract::__invoke(): Argument #1 ($id) must be of type int, string given',
+                    $content['error']['data']
+                );
+                self::assertEquals(1, $content['id']);
+            },
+        ];
+        yield 'bad method name' => [
+            'content' => [
+                'jsonrpc' => '2.0',
+                'method' => 'nonExistenceMethod',
+                'params' => null,
+                'id' => 1,
+            ],
+            'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
+                $content = \json_decode($response->getContent(), true);
+                self::assertArrayHasKey('error', $content);
+                self::assertEquals(-32601, $content['error']['code']);
+                self::assertEquals('The requested method was not found.', $content['error']['message']);
+                self::assertStringContainsString(
+                    'Method "nonExistenceMethod" does not exists',
                     $content['error']['data']
                 );
                 self::assertEquals(1, $content['id']);

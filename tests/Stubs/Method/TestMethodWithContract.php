@@ -10,11 +10,8 @@ use JsonRpcBundle\Tests\Stubs\Contract\Contract;
 #[RpcMethodContract(Contract::class)]
 class TestMethodWithContract
 {
-    public function __invoke(Contract $contract): array
+    public function __invoke(Contract $contract): Contract
     {
-        return [
-            'id' => $contract->id,
-            'text' => $contract->text,
-        ];
+        return $contract;
     }
 }

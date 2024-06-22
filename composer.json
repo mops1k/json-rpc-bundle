@@ -1,8 +1,8 @@
 {
     "name": "mops1k/json-rpc-bundle",
     "description": "This bundle provide an easy way to implement json-rpc server with fully specification supporting.",
-    "type": "symfony-bundle",
     "license": "MIT",
+    "type": "symfony-bundle",
     "keywords": [
         "symfony",
         "symfony-bundle",

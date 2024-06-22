@@ -11,7 +11,7 @@ class JsonRpcResponse extends JsonResponse
 {
     public function __construct(
         mixed $data = null,
-        int|string|null $id,
+        int|string|null $id = null,
         int $status = 200,
         array $headers = ['Content-Type' => 'application/json']
     ) {

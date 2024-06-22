@@ -15,6 +15,9 @@ pint:
 test:
 	docker compose exec application sh -c "php vendor/bin/phpunit"
 
+coverage:
+	docker compose exec application sh -c "php vendor/bin/phpunit --coverage-html=var/coverage"
+
 psalm:
 	docker compose exec application sh -c "php vendor/bin/psalm"
 
@@ -23,5 +26,8 @@ application:
 
 composer:
 	docker compose run composer sh
+
+permissions:
+	docker compose exec application sh -c "chown 1000:1000 -R /app/"
 
 restart: stop start

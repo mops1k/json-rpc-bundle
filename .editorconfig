@@ -9,6 +9,7 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 4
 
-[{composer.json}]
+[*.{json,json5}]
+insert_final_newline = false
 indent_style = space
 indent_size = 4
