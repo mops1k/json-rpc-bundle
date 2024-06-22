@@ -7,7 +7,6 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class JsonRpcControllerTest extends KernelTestCase
 {
@@ -34,7 +33,6 @@ class JsonRpcControllerTest extends KernelTestCase
 
     public function testRpcPreconditionFailed()
     {
-
         self::bootKernel();
         $rpcRequest = Request::create('/rpc', Request::METHOD_POST, content: [
             'jsonrpc' => '2.0',
@@ -57,7 +55,6 @@ class JsonRpcControllerTest extends KernelTestCase
 
     public function testExceptionListenerNotCalled()
     {
-
         self::bootKernel();
         $rpcRequest = Request::create('/bad_path');
         $response = self::$kernel?->handle($rpcRequest);
