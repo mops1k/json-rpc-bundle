@@ -13,12 +13,19 @@ use Nelmio\ApiDocBundle\RouteDescriber\RouteDescriberTrait;
 use OpenApi\Annotations\OpenApi;
 use OpenApi\Attributes as OA;
 use OpenApi\Generator;
-use phpDocumentor\Reflection\Type;
 use Symfony\Component\Routing\RouterInterface;
 
 class MethodDescriber implements DescriberInterface
 {
     use RouteDescriberTrait;
+
+    private array $openApiTypeMap = [
+        'int' => 'integer',
+        'bool' => 'boolean',
+        'string' => 'string',
+        'float' => 'float',
+        'array' => 'array',
+    ];
 
     public function __construct(
         protected MethodResolverInterface $methodResolver,
@@ -43,7 +50,7 @@ class MethodDescriber implements DescriberInterface
 
         $methodsWithNamespace = [];
         $methodsInRoot = [];
-        foreach ($methods as $name => $object) {
+        foreach ($methods as $object) {
             $reflectionClass = new \ReflectionClass($object);
             $attributes = $reflectionClass->getAttributes(AsRpcMethod::class, \ReflectionAttribute::IS_INSTANCEOF);
             foreach ($attributes as $attribute) {
@@ -144,7 +151,7 @@ class MethodDescriber implements DescriberInterface
                 $properties[] = new OA\Property(
                     property: $parameter->getName(),
                     default: $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : Generator::UNDEFINED,
-                    oneOf: \array_map(function ($type) { return new OA\Schema(type: $type); }, $types)
+                    oneOf: \array_map(function ($type) { return new OA\Schema(type: $this->openApiTypeMap[$type] ?? $type); }, $types)
                 );
             }
         }
@@ -201,9 +208,8 @@ class MethodDescriber implements DescriberInterface
             )
         );
 
-        $itemName = $namespace === null ? $name : $namespace.'.'.$name;
         $pathItem->post = new OA\Post(
-            operationId: $itemName,
+            operationId: $pathItem->path,
             requestBody: $requestBody,
             tags: $namespace === null ? ['default'] : [$namespace],
         );

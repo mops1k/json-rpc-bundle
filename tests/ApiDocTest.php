@@ -30,5 +30,6 @@ class ApiDocTest extends KernelTestCase
         self::assertJson($response->getContent());
         $reader = Reader::readFromJson($response->getContent(), OpenApi::class, ReferenceContext::RESOLVE_MODE_ALL);
         self::assertTrue($reader->validate());
+//        file_put_contents(__DIR__.'/../api.json', $response->getContent());
     }
 }
