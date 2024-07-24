@@ -16,10 +16,10 @@ class JsonRpcControllerTest extends KernelTestCase
     }
 
     #[DataProvider('dataProvider')]
-    public function testRpcRequest(array $content, callable $assertionCallable): void
+    public function testRpcRequest(string $path, array $content, callable $assertionCallable): void
     {
         self::bootKernel();
-        $rpcRequest = Request::create('/rpc', Request::METHOD_POST, content: \json_encode($content));
+        $rpcRequest = Request::create($path, Request::METHOD_POST, content: \json_encode($content));
         $rpcRequest->headers->set('Content-Type', 'application/json');
         $response = self::$kernel?->handle($rpcRequest);
         if (!$response instanceof Response) {
@@ -63,11 +63,13 @@ class JsonRpcControllerTest extends KernelTestCase
         }
 
         self::assertEquals(404, $response->getStatusCode());
+        self::assertFalse(\json_validate($response->getContent()));
     }
 
     public static function dataProvider(): iterable
     {
         yield 'no contract, no hints' => [
+            'path' => '/rpc',
             'content' => [
                 'jsonrpc' => '2.0',
                 'method' => 'testMethodWithoutContract',
@@ -82,6 +84,7 @@ class JsonRpcControllerTest extends KernelTestCase
             },
         ];
         yield 'no contract, with hints' => [
+            'path' => '/rpc',
             'content' => [
                 'jsonrpc' => '2.0',
                 'method' => 'testMethodWithoutContract',
@@ -96,6 +99,7 @@ class JsonRpcControllerTest extends KernelTestCase
             },
         ];
         yield 'with contract, no hints' => [
+            'path' => '/rpc',
             'content' => [
                 'jsonrpc' => '2.0',
                 'method' => 'testMethodWithContract',
@@ -110,6 +114,7 @@ class JsonRpcControllerTest extends KernelTestCase
             },
         ];
         yield 'with contract, mixed hints' => [
+            'path' => '/rpc',
             'content' => [
                 'jsonrpc' => '2.0',
                 'method' => 'testMethodWithContract',
@@ -124,6 +129,7 @@ class JsonRpcControllerTest extends KernelTestCase
             },
         ];
         yield 'with contract, with hints' => [
+            'path' => '/rpc',
             'content' => [
                 'jsonrpc' => '2.0',
                 'method' => 'testMethodWithContract',
@@ -138,6 +144,7 @@ class JsonRpcControllerTest extends KernelTestCase
             },
         ];
         yield 'multiple content responses' => [
+            'path' => '/rpc',
             'content' => [
                 [
                     'jsonrpc' => '2.0',
@@ -163,6 +170,7 @@ class JsonRpcControllerTest extends KernelTestCase
             },
         ];
         yield 'contract validation fail' => [
+            'path' => '/rpc',
             'content' => [
                 'jsonrpc' => '2.0',
                 'method' => 'testMethodWithContract',
@@ -181,6 +189,7 @@ class JsonRpcControllerTest extends KernelTestCase
             },
         ];
         yield 'no contract validation fail' => [
+            'path' => '/rpc',
             'content' => [
                 'jsonrpc' => '2.0',
                 'method' => 'testMethodWithoutContract',
@@ -198,6 +207,7 @@ class JsonRpcControllerTest extends KernelTestCase
             },
         ];
         yield 'bad method parameter' => [
+            'path' => '/rpc',
             'content' => [
                 'jsonrpc' => '2.0',
                 'method' => 'testMethodWithoutContract',
@@ -218,6 +228,7 @@ class JsonRpcControllerTest extends KernelTestCase
             },
         ];
         yield 'bad method name' => [
+            'path' => '/rpc',
             'content' => [
                 'jsonrpc' => '2.0',
                 'method' => 'nonExistenceMethod',
@@ -238,6 +249,7 @@ class JsonRpcControllerTest extends KernelTestCase
             },
         ];
         yield 'notification method' => [
+            'path' => '/rpc',
             'content' => [
                 'jsonrpc' => '2.0',
                 'method' => 'testNotificationMethod',
@@ -248,18 +260,8 @@ class JsonRpcControllerTest extends KernelTestCase
                 self::assertFalse(json_validate($response->getContent()));
             },
         ];
-        //        yield 'notification and method without contract' => [
-        //            'content' => [
-        //                'jsonrpc' => '2.0',
-        //                'method' => 'testNotificationMethod',
-        //                'params' => [],
-        //                'id' => 8,
-        //            ],
-        //            'assertionCallable' => function (Response $response) {
-        //                self::assertFalse(json_validate($response->getContent()));
-        //            },
-        //        ];
         yield 'parse error' => [
+            'path' => '/rpc',
             'content' => [1],
             'assertionCallable' => function (Response $response) {
                 self::assertJson($response->getContent() ?: null);
@@ -272,6 +274,80 @@ class JsonRpcControllerTest extends KernelTestCase
                     $content['error']['data']
                 );
                 self::assertEquals(null, $content['id']);
+            },
+        ];
+        yield 'method with namespace in path' => [
+            'path' => '/rpc/testNamespace',
+            'content' => [
+                'jsonrpc' => '2.0',
+                'method' => 'testMethodWithNamespace',
+                'params' => null,
+                'id' => 20,
+            ],
+            'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
+                $content = \json_decode($response->getContent(), true);
+                self::assertArrayHasKey('result', $content);
+                self::assertEquals('Method with namespace running successfully.', $content['result']);
+                self::assertEquals(20, $content['id']);
+            },
+        ];
+        yield 'method with namespace in method name' => [
+            'path' => '/rpc',
+            'content' => [
+                'jsonrpc' => '2.0',
+                'method' => 'testNamespace.testMethodWithNamespace',
+                'params' => null,
+                'id' => 20,
+            ],
+            'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
+                $content = \json_decode($response->getContent(), true);
+                self::assertArrayHasKey('result', $content);
+                self::assertEquals('Method with namespace running successfully.', $content['result']);
+                self::assertEquals(20, $content['id']);
+            },
+        ];
+        yield 'method with bad namespace in method path' => [
+            'path' => '/rpc/testBadNamespace',
+            'content' => [
+                'jsonrpc' => '2.0',
+                'method' => 'testMethodWithoutContract',
+                'params' => ['id' => -8],
+                'id' => 21,
+            ],
+            'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
+                $content = \json_decode($response->getContent(), true);
+                self::assertArrayHasKey('error', $content);
+                self::assertEquals(-32601, $content['error']['code']);
+                self::assertEquals('The requested method was not found.', $content['error']['message']);
+                self::assertStringContainsString(
+                    'Method "testBadNamespace.testMethodWithoutContract" does not exists',
+                    $content['error']['data']
+                );
+                self::assertEquals(21, $content['id']);
+            },
+        ];
+        yield 'method with bad namespace in method name' => [
+            'path' => '/rpc',
+            'content' => [
+                'jsonrpc' => '2.0',
+                'method' => 'testBadNamespace.testMethodWithNamespace',
+                'params' => null,
+                'id' => 21,
+            ],
+            'assertionCallable' => function (Response $response) {
+                self::assertJson($response->getContent() ?: null);
+                $content = \json_decode($response->getContent(), true);
+                self::assertArrayHasKey('error', $content);
+                self::assertEquals(-32601, $content['error']['code']);
+                self::assertEquals('The requested method was not found.', $content['error']['message']);
+                self::assertStringContainsString(
+                    'Method "testBadNamespace.testMethodWithNamespace" does not exists',
+                    $content['error']['data']
+                );
+                self::assertEquals(21, $content['id']);
             },
         ];
     }

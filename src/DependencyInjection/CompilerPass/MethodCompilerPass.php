@@ -18,6 +18,7 @@ class MethodCompilerPass implements CompilerPassInterface
                 $methodHandlerDefinition->addMethodCall('add', [
                     '$name' => $tag['methodName'],
                     '$method' => $definition,
+                    '$namespace' => $tag['namespace'],
                 ]);
             }
         }

@@ -21,7 +21,7 @@ class JsonRpcBundle extends Bundle
             ) {
                 $definition->setAutowired(true);
                 $definition->setAutoconfigured(true);
-                $definition->addTag('jsonrpc.method', ['methodName' => $attribute->methodName]);
+                $definition->addTag('jsonrpc.method', ['methodName' => $attribute->methodName, 'namespace' => $attribute->namespace]);
             }
         );
         $container->addCompilerPass(new MethodCompilerPass());

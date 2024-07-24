@@ -1,7 +1,7 @@
 all: start
 
 up:
-	docker compose up -d
+	docker compose up -d --remove-orphans
 
 stop:
 	docker compose stop
@@ -22,16 +22,13 @@ psalm:
 	docker compose exec application sh -c "php vendor/bin/psalm"
 
 update:
-	docker compose run composer sh -c "composer update"
+	docker compose exec application sh -c "composer update"
 
 update-lowest:
-	docker compose run composer sh -c "composer update --prefer-lowest"
+	docker compose exec application sh -c "composer update --prefer-lowest"
 
 application:
 	docker compose exec application sh
-
-composer:
-	docker compose run composer sh
 
 permissions:
 	docker compose exec application sh -c "chown 1000:1000 -R /app/"

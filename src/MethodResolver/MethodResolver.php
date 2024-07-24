@@ -31,7 +31,7 @@ class MethodResolver implements MethodResolverInterface
      * @throws \ReflectionException
      * @throws ExceptionInterface
      */
-    public function resolve(JsonRpcRequest $jsonRpcRequest): mixed
+    public function resolve(JsonRpcRequest $jsonRpcRequest, ?string $namespace = null): mixed
     {
         if (null === $jsonRpcRequest->method) {
             throw new JsonRpcMethodNotExistsException(
@@ -40,15 +40,16 @@ class MethodResolver implements MethodResolverInterface
             );
         }
 
-        if (!\array_key_exists($jsonRpcRequest->method, $this->methods)) {
+        $methodName = null === $namespace ? $jsonRpcRequest->method : $namespace.'.'.$jsonRpcRequest->method;
+        if (!\array_key_exists($methodName, $this->methods)) {
             throw new JsonRpcMethodNotExistsException(
-                \sprintf('Method "%s" does not exists', $jsonRpcRequest->method),
+                \sprintf('Method "%s" does not exists', $methodName),
                 $jsonRpcRequest->id
             );
         }
 
         $contractClassName = null;
-        $method = $this->methods[$jsonRpcRequest->method];
+        $method = $this->methods[$methodName];
 
         $methodReflectionClass = new \ReflectionClass($method);
         $attributes = $methodReflectionClass->getAttributes(RpcMethodContract::class);
@@ -142,8 +143,12 @@ class MethodResolver implements MethodResolverInterface
         return $method($contract);
     }
 
-    public function add(string $name, object $method): void
+    public function add(string $name, object $method, ?string $namespace = null): void
     {
+        if (null !== $namespace) {
+            $name = $namespace.'.'.$name;
+        }
+
         if (\array_key_exists($name, $this->methods)) {
             throw new JsonRpcInternalErrorException(
                 \sprintf('Method with name "%s" already defined.', $name)

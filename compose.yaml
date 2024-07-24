@@ -1,20 +1,11 @@
 services:
-    composer:
-        image: composer:latest
-        working_dir: /app
-        command: sh -c "cd /app && composer update --prefer-dist"
-        volumes:
-            - ./:/app/:rw
-
     application:
-        image: jitesoft/phpunit:8.3
+        image: ghcr.io/mops1k/php-cli-dev-docker:latest
         working_dir: /app
         environment:
             XDEBUG_MODE: "debug,coverage,develop"
             XDEBUG_CONFIG: "client_host=host.docker.internal"
             PHP_IDE_CONFIG: "serverName=application"
         command: tail -f >/dev/null
-        depends_on:
-            -   composer
         volumes:
             -   ./:/app/:rw

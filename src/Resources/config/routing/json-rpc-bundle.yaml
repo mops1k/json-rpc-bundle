@@ -2,3 +2,8 @@ json_rpc_entrypoint:
     path: '/rpc'
     methods: 'POST'
     controller: 'JsonRpcBundle\Controller\JsonRpcController'
+
+json_rpc_namespace_entrypoint:
+    path: '/rpc/{namespace}'
+    methods: 'POST'
+    controller: 'JsonRpcBundle\Controller\JsonRpcController'

@@ -11,12 +11,25 @@ with [CQRS](https://en.wikipedia.org/wiki/Command_Query_Responsibility_Segregati
 ```bash
 composer require mops1k/json-rpc-bundle
 ```
-Import route delaration in your routes:
+Import route declaration in your routes:
 ```yaml
 #config/routes/json-rpc.yaml
 app_file:
     # loads routes from the given routing file stored in some bundle
     resource: '@JsonRpcBundle/Resources/config/routing/json-rpc-bundle.yaml'
+```
+
+Or add your own paths by template:
+```yaml
+json_rpc_entrypoint:
+    path: '/path/to/rpc'
+    methods: 'POST'
+    controller: 'JsonRpcBundle\Controller\JsonRpcController'
+
+json_rpc_namespace_entrypoint:
+    path: '/path/to/rpc/{namespace}'
+    methods: 'POST'
+    controller: 'JsonRpcBundle\Controller\JsonRpcController'
 ```
 
 ## Usage
@@ -41,6 +54,8 @@ class MethodWithoutContract
     }
 }
 ```
+
+#### Contract request DTO
 
 Bundle provide possibility to provide params to your DTO class. For these feature you have to add
 attribute [`\JsonRpcBundle\Attribute\RpcMethodContract`](./src/Attribute/RpcMethodContract.php).
@@ -79,6 +94,7 @@ class MethodWithContract
     }
 }
 ```
+#### Validation for method params without contract
 
 If you don't want to use DTO, you still able to validate method parameters and set its groups. In this case you need to
 implement your method class
@@ -118,8 +134,11 @@ class MethodWithoutContract implements ValidateMethodParametersInterface
 }
 ```
 
+#### Notification
+
 Json rpc supports notification requests what does not return any response. To make your method as notification, just
-add `void` in `__invoke` return type hint. Example:
+add `void` in `__invoke` return type hint.
+Example:
 ```php
 use JsonRpcBundle\Attribute\AsRpcMethod;
 
@@ -132,3 +151,47 @@ class UpdateUser
     }
 }
 ```
+
+#### Namespace
+
+Bundle supports method namespacing. To set method namespace, use `\JsonRpcBundle\Attribute\AsRpcMethod::$namespace` attribute parameter.
+Example:
+```php
+use JsonRpcBundle\Attribute\AsRpcMethod;
+
+#[AsRpcMethod(methodName: 'update', namespace: 'user')]
+class UpdateUser
+{
+    public function __invoke(int $id): void
+    {
+        // some logic
+    }
+}
+```
+
+To fetch namespaced method you can call it by method name (`namespace.methodName`) or call to path `/rpc/{namespace}` and use regular method name.
+Examples:
+
+1. Call to `/rpc`:
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "method": "user.update",
+      "params": null,
+      "id": 32
+    }
+    ```
+2. Call to `/rpc/user`:
+    ```json
+    {
+      "jsonrpc": "2.0",
+      "method": "update",
+      "params": null,
+      "id": 32
+    }
+    ```
+
+> This feature also supports bath requests.
+
+## API Documentation `(todo)`
+> **Soon** - add NelmioApiDocBundle support

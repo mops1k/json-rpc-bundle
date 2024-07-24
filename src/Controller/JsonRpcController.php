@@ -21,12 +21,12 @@ readonly class JsonRpcController
     ) {
     }
 
-    public function __invoke(JsonRpcRequest ...$requests): JsonRpcResponse|JsonRpcCollectionResponse|JsonRpcErrorResponse|Response
+    public function __invoke(?string $namespace = null, JsonRpcRequest ...$requests): JsonRpcResponse|JsonRpcCollectionResponse|JsonRpcErrorResponse|Response
     {
         $responses = [];
         foreach ($requests as $request) {
             try {
-                $result = $this->methodHandler->resolve($request);
+                $result = $this->methodHandler->resolve($request, $namespace);
                 if (null === $result) {
                     continue;
                 }
