@@ -6,3 +6,4 @@
 ./README.md                export-ignore
 ./Makefile                 export-ignore
 ./compose.yaml             export-ignore
+./doc-example.png          export-ignore

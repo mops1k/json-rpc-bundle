@@ -11,7 +11,9 @@ with [CQRS](https://en.wikipedia.org/wiki/Command_Query_Responsibility_Segregati
 ```bash
 composer require mops1k/json-rpc-bundle
 ```
+
 Import route declaration in your routes:
+
 ```yaml
 #config/routes/json-rpc.yaml
 app_file:
@@ -20,6 +22,7 @@ app_file:
 ```
 
 Or add your own paths by template:
+
 ```yaml
 json_rpc_entrypoint:
     path: '/path/to/rpc'
@@ -94,6 +97,7 @@ class MethodWithContract
     }
 }
 ```
+
 #### Validation for method params without contract
 
 If you don't want to use DTO, you still able to validate method parameters and set its groups. In this case you need to
@@ -139,6 +143,7 @@ class MethodWithoutContract implements ValidateMethodParametersInterface
 Json rpc supports notification requests what does not return any response. To make your method as notification, just
 add `void` in `__invoke` return type hint.
 Example:
+
 ```php
 use JsonRpcBundle\Attribute\AsRpcMethod;
 
@@ -154,8 +159,10 @@ class UpdateUser
 
 #### Namespace
 
-Bundle supports method namespacing. To set method namespace, use `\JsonRpcBundle\Attribute\AsRpcMethod::$namespace` attribute parameter.
+Bundle supports method namespacing. To set method namespace, use `\JsonRpcBundle\Attribute\AsRpcMethod::$namespace`
+attribute parameter.
 Example:
+
 ```php
 use JsonRpcBundle\Attribute\AsRpcMethod;
 
@@ -169,7 +176,8 @@ class UpdateUser
 }
 ```
 
-To fetch namespaced method you can call it by method name (`namespace.methodName`) or call to path `/rpc/{namespace}` and use regular method name.
+To fetch namespaced method you can call it by method name (`namespace.methodName`) or call to path `/rpc/{namespace}`
+and use regular method name.
 Examples:
 
 1. Call to `/rpc`:
@@ -193,5 +201,15 @@ Examples:
 
 > This feature also supports bath requests.
 
-## API Documentation `(todo)`
-> **Soon** - add NelmioApiDocBundle support
+## API Documentation
+
+![documentation example](./doc-example.png "documentation example")
+
+Bundle supports documentation semi-auto generation
+thru [nelmio/api-doc-bundle](https://github.com/nelmio/NelmioApiDocBundle).
+By default documentation generate params from method parameters, method contract. If you need more specific params
+documentation,
+just use `OA\Property` attribute. If you need specific response result, then
+use `\JsonRpcBundle\ApiDoc\Attribute\Result`
+attribute (set array of `OA\Property` inside `$properties` parameter).
+Object responses auto-generated to documentation by it's describing inside class.
