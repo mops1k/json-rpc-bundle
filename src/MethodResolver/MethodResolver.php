@@ -157,4 +157,9 @@ class MethodResolver implements MethodResolverInterface
 
         $this->methods[$name] = $method;
     }
+
+    public function getMethodsList(): array
+    {
+        return $this->methods;
+    }
 }

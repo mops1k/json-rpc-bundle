@@ -3,6 +3,7 @@
 namespace JsonRpcBundle\Tests\Stubs;
 
 use JsonRpcBundle\JsonRpcBundle;
+use Nelmio\ApiDocBundle\NelmioApiDocBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -11,6 +12,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\AbstractConfigurat
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader as ContainerPhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Routing\Loader\ContainerLoader;
@@ -27,6 +29,7 @@ class TestKernel extends Kernel
         return [
             new FrameworkBundle(),
             new JsonRpcBundle(),
+            new NelmioApiDocBundle(),
         ];
     }
 
@@ -111,6 +114,10 @@ class TestKernel extends Kernel
         }
         $configurator = new RoutingConfigurator($collection, $kernelLoader, $file, $file, 'test');
         $configurator->import(__DIR__.'/../../src/Resources/config/routing/json-rpc-bundle.php');
+        $configurator
+            ->add('nelmio_api_doc', '/api/doc.json')
+            ->methods([Request::METHOD_GET])
+            ->controller('nelmio_api_doc.controller.swagger');
 
         return $collection;
     }
