@@ -3,6 +3,9 @@
 namespace JsonRpcBundle\Tests;
 
 use JsonRpcBundle\Tests\Stubs\TestKernel;
+use openapiphp\openapi\Reader;
+use openapiphp\openapi\ReferenceContext;
+use openapiphp\openapi\spec\OpenApi;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,8 +27,8 @@ class ApiDocTest extends KernelTestCase
             self::fail();
         }
 
-//        file_put_contents(__DIR__.'/api.json', $response->getContent());
-//        dd($response->getContent());
         self::assertJson($response->getContent());
+        $reader = Reader::readFromJson($response->getContent(), OpenApi::class, ReferenceContext::RESOLVE_MODE_ALL);
+        self::assertTrue($reader->validate());
     }
 }
