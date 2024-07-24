@@ -2,7 +2,9 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use JsonRpcBundle\ApiDocDescriber\MethodDescriber;
+use JsonRpcBundle\ApiDoc\Describer\MethodDescriber;
+use JsonRpcBundle\ApiDoc\Describer\MethodDescriberInterface;
+use JsonRpcBundle\ApiDoc\Describer\RemoveDefaultRpcPathDescriber;
 use JsonRpcBundle\ArgumentResolver\JsonRpcRequestResolver;
 use JsonRpcBundle\Controller\JsonRpcController;
 use JsonRpcBundle\Listener\JsonRpcExceptionListener;
@@ -36,11 +38,17 @@ return static function (ContainerConfigurator $container): void {
     $services->set(JsonRpcExceptionListener::class)
         ->tag('kernel.event_listener', ['event' => KernelEvents::EXCEPTION]);
 
-    $services->set(MethodDescriber::class)
+    $services->set(MethodDescriberInterface::class)
+        ->class(MethodDescriber::class)
         ->args([
             '$methodResolver' => service(MethodResolverInterface::class),
             '$router' => service('router'),
-            '$describer' => service('nelmio_api_doc.route_describers.route_metadata')
         ])
-        ->tag('nelmio_api_doc.route_describer', ['priority' => 1000]);
+        ->tag('nelmio_api_doc.route_describer', ['priority' => -10000]);
+
+    $services->set(RemoveDefaultRpcPathDescriber::class)
+        ->args([
+            '$router' => service('router'),
+        ])
+        ->tag('nelmio_api_doc.route_describer', ['priority' => 100000]);
 };

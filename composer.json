@@ -34,6 +34,9 @@
         "psalm/plugin-symfony": "5.2.3",
         "vimeo/psalm": "5.16.0"
     },
+    "suggest": {
+        "nelmio/api-doc-bundle": "^2.42"
+    },
     "autoload": {
         "psr-4": {
             "JsonRpcBundle\\": "./src"
