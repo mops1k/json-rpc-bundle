@@ -11,6 +11,7 @@ use Nelmio\ApiDocBundle\OpenApiPhp\Util;
 use OpenApi\Annotations\OpenApi;
 use OpenApi\Attributes as OA;
 use OpenApi\Generator;
+use phpDocumentor\Reflection\DocBlockFactory;
 use Symfony\Component\Routing\RouterInterface;
 
 class MethodDescriber implements MethodDescriberInterface
@@ -25,6 +26,8 @@ class MethodDescriber implements MethodDescriberInterface
         'true' => 'boolean',
         'false' => 'boolean',
     ];
+
+    private array $taggedNamespaces = [];
 
     public function __construct(
         protected MethodResolverInterface $methodResolver,
@@ -95,6 +98,7 @@ class MethodDescriber implements MethodDescriberInterface
     /**
      * @psalm-suppress UndefinedPropertyAssignment
      * @psalm-suppress PossiblyUndefinedMethod
+     * @psalm-suppress InvalidArgument
      */
     private function describeMethod(
         OpenApi $api,
@@ -337,10 +341,30 @@ class MethodDescriber implements MethodDescriberInterface
             )
         );
 
+        $phpDocumentor = DocBlockFactory::createInstance();
+        $docComment = false === $reflectionMethod->getDocComment() ? $reflectionClass->getDocComment() : $reflectionMethod->getDocComment();
+
+        $description = null;
+        if (false !== $docComment) {
+            $docBlock = $phpDocumentor->create($docComment);
+            $description = $docBlock->getSummary();
+        }
+
+        if (null !== $namespace && !\array_key_exists($namespace, $this->taggedNamespaces)) {
+            $tag = new OA\Tag(
+                name: ucfirst($namespace),
+                description: \sprintf('JSON-RPC namespace "%s"', ucfirst($namespace)),
+            );
+
+            $api->tags = [$tag];
+            $this->taggedNamespaces[$namespace] = true;
+        }
+
         $pathItem->post = new OA\Post(
             operationId: $pathItem->path,
+            description: '' === $description ? null : $description,
             requestBody: $requestBody,
-            tags: null === $namespace ? ['default'] : [$namespace],
+            tags: null === $namespace ? null : [ucfirst($namespace)],
             responses: [
                 $response,
             ],
